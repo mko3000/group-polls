@@ -1,0 +1,7 @@
+<h2>Polls</h2>
+
+{% if session.user_id %}
+Logged in as <b>{{session.user_name}}</b> <a href="/logout">Log out</a>
+{% else %}
+<a href="/login">Log in</a>
+{% endif %}
