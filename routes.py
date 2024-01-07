@@ -34,8 +34,10 @@ def register():
         if len(username) < 1:
             return render_template("error.html", message="Too short")
 
-        password1 = request.form["password1"]
-        password2 = request.form["password2"]
+        password1 = request.form["password"]
+        #password2 = request.form["password2"]
+        #TODO: password2 confirmation for regeister.html
+        password2 = password1
         if password1 != password2:
             return render_template("error.html", message="Passwords do not match")
         if password1 == "":

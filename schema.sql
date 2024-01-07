@@ -1,7 +1,7 @@
 CREATE TABLE polls_users (
     id SERIAL PRIMARY KEY,
-    name TEXT,
-    password TEXT,
+    username TEXT UNIQUE,
+    password TEXT
 );
 
 CREATE TABLE polls_groups (
@@ -23,14 +23,14 @@ CREATE TABLE polls_polls (
     closes_at TIMESTAMP
 );
 
-CREATE TABLE polls_choises (
+CREATE TABLE polls_choices (
     id SERIAL PRIMARY KEY,
-    desc TEXT,
-    added_by INTEGER REFERENCES polls_users
+    name TEXT,
+    added_by INTEGER REFERENCES polls_users,
     votes INTEGER --this maybe not needed
 );
 
 CREATE TABLE polls_user_votes (
-    choise_id INTEGER REFERENCES polls_choises,
-    user_id INTEGER REFERENCES user_id
-)
+    choice_id INTEGER REFERENCES polls_choices,
+    user_id INTEGER REFERENCES polls_users
+);
