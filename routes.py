@@ -54,13 +54,15 @@ def newgroup():
         return render_template("newgroup.html")
     
     if request.method == "POST":
-        print("NEW GROUP")
         users.check_csrf()
-        print("csrf checked")
 
         name = request.form["name"]
         creator = users.user_id()
-        print(f'user {creator} creating group {name}')
         group_id = groups.add_group(name, creator)
 
     return redirect("/")
+
+@app.route("/group/<int:group_id>")
+def group(group_id):
+    name = groups.group_name(group_id)
+    return render_template("group.html",name=name)
