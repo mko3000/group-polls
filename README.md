@@ -30,6 +30,7 @@ If there's time/resources/interest these functions will be added.
 ### Group
 * Group name, number of members, and the group creation time are shown.
 * In the poll listing, a timer is shown if the poll is active, and if the poll has ended it is signified in another way.
+* Ability to lock group and accept and kick members for the group founder.
 
 ### Poll
 When creating a poll, the user can configure various properties for the poll.

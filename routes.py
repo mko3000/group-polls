@@ -1,10 +1,11 @@
 from app import app
 from flask import render_template, request, redirect
 import users
+import groups
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("index.html", groups=groups.get_all_groups())
 
 @app.route("/login", methods=["get", "post"])
 def login():
@@ -46,3 +47,20 @@ def register():
         if not users.register(username, password1):
             return render_template("error.html", message="Registeration failed")
         return redirect("/")
+
+@app.route("/newgroup", methods=["get", "post"])
+def newgroup():
+    if request.method == "GET":
+        return render_template("newgroup.html")
+    
+    if request.method == "POST":
+        print("NEW GROUP")
+        users.check_csrf()
+        print("csrf checked")
+
+        name = request.form["name"]
+        creator = users.user_id()
+        print(f'user {creator} creating group {name}')
+        group_id = groups.add_group(name, creator)
+
+    return redirect("/")

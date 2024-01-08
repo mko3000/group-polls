@@ -1,0 +1,15 @@
+{% if session.user_id %}
+Logged in as <b>{{session.user_name}}</b> <a href="/logout">Log out</a>
+{% else %}
+<a href="/login">Log in</a>
+{% endif %}
+
+<h2>New group</h2>
+
+<form action="/newgroup" method="POST">
+Group name: <br><input type="text" name="name">
+<input type="submit" value="Submit">
+<input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+</form>
+<p>
+<a href="/">Back</a>

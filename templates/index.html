@@ -1,7 +1,18 @@
-<h2>Polls</h2>
-
 {% if session.user_id %}
 Logged in as <b>{{session.user_name}}</b> <a href="/logout">Log out</a>
 {% else %}
 <a href="/login">Log in</a>
 {% endif %}
+
+<h2>Polls</h2>
+
+<p>
+<h3>Groups</h3>
+
+<hr>
+    {% for group in groups %}
+    {{ group.name }}
+</hr>
+{% endfor %}
+<p>
+<a href="/newgroup">New group</a>
