@@ -21,7 +21,8 @@ CREATE TABLE polls_polls (
     group_id INTEGER REFERENCES polls_groups,
     created_by INTEGER REFERENCES polls_users,
     created_at TIMESTAMP,
-    closes_at TIMESTAMP
+    closes_at TIMESTAMP,
+    description TEXT
 );
 
 CREATE TABLE polls_choices (

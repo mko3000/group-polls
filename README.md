@@ -31,6 +31,7 @@ If there's time/resources/interest these functions will be added.
 * Group name, number of members, and the group creation time are shown.
 * In the poll listing, a timer is shown if the poll is active, and if the poll has ended it is signified in another way.
 * Ability to lock group and accept and kick members for the group founder.
+* Group creator can delete the group.
 
 ### Poll
 When creating a poll, the user can configure various properties for the poll.
@@ -38,3 +39,4 @@ When creating a poll, the user can configure various properties for the poll.
 * Multichoice polls and single-choice polls.
 * Hide/show results if the user has not voted.
 * Lock the poll so that users can't add choices.
+* Poll creator can delete the poll.

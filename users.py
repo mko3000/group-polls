@@ -36,7 +36,6 @@ def register(username, password):
     return login(username, password)
 
 def user_id():
-    print(f'USER ID: {session.get("user_id", 0)}')
     return session.get("user_id", 0)
 
 def check_csrf():

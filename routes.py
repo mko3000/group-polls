@@ -2,6 +2,7 @@ from app import app
 from flask import render_template, request, redirect
 import users
 import groups
+import polls
 
 @app.route("/")
 def index():
@@ -60,14 +61,21 @@ def newgroup():
         creator = users.user_id()
         group_id = groups.add_group(name, creator)
 
-    return redirect("/")
+    return redirect(f'/group/{group_id}')
 
 @app.route("/group/<int:group_id>")
 def group(group_id):
     name = groups.group_info(group_id)[0]
     members = groups.group_info(group_id)[1]
     in_group = groups.in_group(users.user_id(), group_id)
-    return render_template("group.html", group_id=group_id, name=name, members=members, in_group=in_group)
+    return render_template(
+        "group.html", 
+        group_id=group_id, 
+        name=name, 
+        members=members, 
+        in_group=in_group, 
+        polls=polls.get_group_polls(group_id)
+    )
 
 @app.route("/join/<int:group_id>")
 def join(group_id):
@@ -78,3 +86,23 @@ def join(group_id):
 def leave(group_id):
     groups.leave_group(users.user_id(),group_id)
     return redirect(f'/group/{group_id}')
+
+@app.route("/newpoll/<int:group_id>", methods=["get", "post"])
+def newpoll(group_id):
+    if request.method == "GET":
+        return render_template("newpoll.html",group_id=group_id)
+    
+    if request.method == "POST":
+        users.check_csrf()
+
+        name = request.form["name"]
+        creator = users.user_id()
+        #closes_at = request.form["closes_at"]
+        closes_at = "2024-02-29 10:10:10"
+        poll_id = polls.add_poll(name,group_id,creator,closes_at)
+
+    return redirect(f'/group/{group_id}')
+
+@app.route("/poll/<int:poll_id>")
+def poll(poll_id):
+    return render_template("poll.html")

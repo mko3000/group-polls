@@ -25,7 +25,6 @@ def group_info(group_id):
     name = db.session.execute(sql, {"group_id":group_id}).fetchone()[0]
     sql = text("SELECT COUNT(user_id) FROM polls_group_members WHERE group_id=:group_id")
     member_count = db.session.execute(sql, {"group_id":group_id}).fetchone()[0]
-    print(f'group name: {name}, members: {member_count}')
     return [name,member_count]
 
 def join_group(user_id, group_id):
@@ -40,7 +39,6 @@ def join_group(user_id, group_id):
     db.session.commit()
 
 def in_group(user_id, group_id):
-    print(f'check if user {user_id} in group {group_id}')
     sql = text("SELECT * FROM polls_group_members WHERE group_id = :group_id AND user_id = :user_id")
     result = db.session.execute(sql, {"group_id":group_id,"user_id":user_id}).fetchone()
     if result != None:
