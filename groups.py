@@ -46,3 +46,8 @@ def in_group(user_id, group_id):
     if result != None:
         return True
     return False
+
+def leave_group(user_id, group_id):
+    sql = text("DELETE FROM polls_group_members WHERE group_id = :group_id AND user_id = :user_id")
+    db.session.execute(sql, {"group_id":group_id,"user_id":user_id})
+    db.session.commit()

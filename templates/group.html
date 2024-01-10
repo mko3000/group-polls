@@ -3,6 +3,8 @@
 
 {% if in_group %}
 You &#40;{{session.user_name}}&#41; have joined this group. 
+<p>
+<a href="/leave/{{ group_id }}">Leave group</a>
 {% else %}
 <form action="/group" method="post"></form>
 <a href="/join/{{ group_id }}">Join</a>

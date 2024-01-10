@@ -73,3 +73,8 @@ def group(group_id):
 def join(group_id):
     groups.join_group(users.user_id(),group_id)
     return redirect(f'/group/{group_id}')
+
+@app.route("/leave/<int:group_id>")
+def leave(group_id):
+    groups.leave_group(users.user_id(),group_id)
+    return redirect(f'/group/{group_id}')
