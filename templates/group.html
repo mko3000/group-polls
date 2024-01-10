@@ -1,4 +1,12 @@
-{{ name }}
+<h2>{{ name }}</h2>
+<p>members: {{ members }}</p>
+
+{% if in_group %}
+You &#40;{{session.user_name}}&#41; have joined this group. 
+{% else %}
+<form action="/group" method="post"></form>
+<a href="/join/{{ group_id }}">Join</a>
+{% endif %}
 
 <p>
 <a href="/">Back</a>

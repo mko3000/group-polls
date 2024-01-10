@@ -64,5 +64,12 @@ def newgroup():
 
 @app.route("/group/<int:group_id>")
 def group(group_id):
-    name = groups.group_name(group_id)
-    return render_template("group.html",name=name)
+    name = groups.group_info(group_id)[0]
+    members = groups.group_info(group_id)[1]
+    in_group = groups.in_group(users.user_id(), group_id)
+    return render_template("group.html", group_id=group_id, name=name, members=members, in_group=in_group)
+
+@app.route("/join/<int:group_id>")
+def join(group_id):
+    groups.join_group(users.user_id(),group_id)
+    return redirect(f'/group/{group_id}')
