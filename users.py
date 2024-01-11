@@ -37,6 +37,10 @@ def register(username, password):
 def user_id():
     return session.get("user_id", 0)
 
+def get_user_name(user_id):
+    sql = text("SELECT username FROM polls_users WHERE id=:user_id")
+    return db.session.execute(sql, {"user_id":user_id}).fetchone()[0]
+
 def check_csrf():
     if session["csrf_token"] != request.form["csrf_token"]:
         abort(403)

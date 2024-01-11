@@ -130,14 +130,33 @@ def newpoll():
 
 @app.route("/poll/<int:poll_id>")
 def poll(poll_id): 
+    group_id = groups.get_group_id()
+    group_name = groups.group_name(group_id)
     info = polls.poll_info(poll_id)   
+
     return render_template(
         "poll.html",
         name = info[0],
-        created_by = info[1],
+        created_by = users.get_user_name(info[1]),
         created_at = info[2],
         closes_at = info[3],
         description = info[4],
-        group_id = info[5],
-        choices = polls.get_choices(poll_id)
+        group_id = group_id,
+        group_name = group_name,
+        choices = polls.get_choices(poll_id),
+        poll_id = poll_id
     )
+
+@app.route("/newchoice", methods=["post"])
+def newchoice():
+    print("new choice painettu")
+    users.check_csrf()
+    if users.user_id() == 0:
+        return render_template("error.html", message="Not logged in")
+    
+    print("user ok")
+    poll_id = request.args.get("poll_id")
+    print(f'poll_id: {poll_id}, user_id {users.user_id()}, text: {request.form["new_choice"]}')
+    choice_id = polls.add_choice(request.form["new_choice"], poll_id, users.user_id())
+
+    return redirect(f'/poll/{poll_id}')

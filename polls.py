@@ -46,7 +46,7 @@ def get_choices(poll_id):
 def add_choice(name, poll_id, added_by):
     sql = text("""
         INSERT INTO polls_choices (name, poll_id, added_by, votes)
-        VALUES (:name, :poll_id, :added_by, 0)
+        VALUES (:name, :poll_id, :added_by, 0) RETURNING id
     """)
     choice_id = db.session.execute(sql, {"name":name, "poll_id":poll_id, "added_by":added_by}).fetchone()[0]    
     db.session.commit()
