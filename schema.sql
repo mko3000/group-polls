@@ -28,6 +28,7 @@ CREATE TABLE polls_polls (
 CREATE TABLE polls_choices (
     id SERIAL PRIMARY KEY,
     name TEXT,
+    poll_id INTEGER REFERENCES polls_polls,
     added_by INTEGER REFERENCES polls_users,
     votes INTEGER --this may not be needed
 );

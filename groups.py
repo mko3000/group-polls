@@ -1,11 +1,14 @@
 from db import db
 from sqlalchemy.sql import text
+from flask import session
 
 def get_all_groups():
     sql = text("SELECT id, name FROM polls_groups")
     return db.session.execute(sql).fetchall()
 
 def add_group(name, creator):
+    if creator == 0:
+        return False
     sql = text("""
         INSERT INTO polls_groups (name, creator)
         VALUES (:name, :creator) RETURNING id
@@ -28,6 +31,9 @@ def group_info(group_id):
     return [name,member_count]
 
 def join_group(user_id, group_id):
+    print("JOINING USER ID:",user_id)
+    if user_id == 0:
+        return False
     sql = text("""
         INSERT INTO polls_group_members (group_id, user_id)
         SELECT * FROM (SELECT :group_id, :user_id) AS tmp
@@ -49,3 +55,13 @@ def leave_group(user_id, group_id):
     sql = text("DELETE FROM polls_group_members WHERE group_id = :group_id AND user_id = :user_id")
     db.session.execute(sql, {"group_id":group_id,"user_id":user_id})
     db.session.commit()
+
+def start_group_session(group_id):
+    session["group_id"]=group_id
+
+def end_group_session():
+    if "group_id" in session:
+        del session["group_id"]
+
+def get_group_id():
+    return session.get("group_id", 0)

@@ -15,7 +15,6 @@ def login(username, password):
     session["user_id"] = user[1]
     session["user_name"] = username
     session["csrf_token"] = os.urandom(16).hex()
-    print(f'session["user_id"]: {session["user_id"]}')
     return True
 
 def logout():
@@ -39,8 +38,5 @@ def user_id():
     return session.get("user_id", 0)
 
 def check_csrf():
-    print("CHECKING CSRF")
-    print(f'session["csrf_token"]: {session["csrf_token"]}')
-    print(f'request.form["csrf_token"]: {request.form["csrf_token"]}')
     if session["csrf_token"] != request.form["csrf_token"]:
         abort(403)

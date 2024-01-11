@@ -2,23 +2,24 @@
 <p>members: {{ members }}</p>
 
 {% if in_group %}
-You &#40;{{session.user_name}}&#41; have joined this group. 
+You &#40;{{session.user_name}}&#41; have joined this group.
 <p>
-    <h3>Polls</h3>
+<h3>Polls</h3>
 
-    <hr>
-    {% for poll in polls %}
-    <a href="/poll/{{ poll.id }}">{{ poll.name }}</a>
-    <hr>
-    {% endfor %}
-    <a href="/newpoll/{{ group_id }}"><b>New poll</b></a></b>
+<hr>
+{% for poll in polls %}
+<a href="/poll/{{ poll.id }}">{{ poll.name }}</a>
+<hr>
+{% endfor %}
+<p>
+    <a href="/newpoll"><b>New poll</b></a>
 
-<p>    
-<a href="/leave/{{ group_id }}">Leave group</a>
-{% else %}
+<p>
+    <a href="/leave/{{ group_id }}">Leave group</a>
+    {% else %}
 <form action="/group" method="post"></form>
 <a href="/join/{{ group_id }}">Join</a>
 {% endif %}
 
 <p>
-<a href="/">Back</a>
+    <a href="/">Back</a>
