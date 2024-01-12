@@ -133,6 +133,14 @@ def poll(poll_id):
     group_id = groups.get_group_id()
     group_name = groups.group_name(group_id)
     info = polls.poll_info(poll_id)   
+    choices = polls.get_choices(poll_id)
+    user_choices = []
+    for choice in choices:
+        user_choices.append((
+            choice, 
+            polls.has_voted(choice[0],users.user_id()),
+            polls.get_choice_votes(choice[0])
+        ))
 
     return render_template(
         "poll.html",
@@ -143,20 +151,41 @@ def poll(poll_id):
         description = info[4],
         group_id = group_id,
         group_name = group_name,
-        choices = polls.get_choices(poll_id),
+        choices = user_choices,
         poll_id = poll_id
     )
 
 @app.route("/newchoice", methods=["post"])
 def newchoice():
-    print("new choice painettu")
     users.check_csrf()
     if users.user_id() == 0:
         return render_template("error.html", message="Not logged in")
-    
-    print("user ok")
+
     poll_id = request.args.get("poll_id")
-    print(f'poll_id: {poll_id}, user_id {users.user_id()}, text: {request.form["new_choice"]}')
     choice_id = polls.add_choice(request.form["new_choice"], poll_id, users.user_id())
+
+    return redirect(f'/poll/{poll_id}')
+
+@app.route("/upvote", methods=["post"])
+def upvote():
+    users.check_csrf()
+    if users.user_id() == 0:
+        return render_template("error.html", message="Not logged in")
+
+    poll_id = request.args.get("poll_id")
+    choice_id = request.form["choice_id"]
+    polls.vote(choice_id,users.user_id())    
+
+    return redirect(f'/poll/{poll_id}')
+
+@app.route("/downvote", methods=["post"])
+def downvote():
+    users.check_csrf()
+    if users.user_id() == 0:
+        return render_template("error.html", message="Not logged in")
+
+    poll_id = request.args.get("poll_id")
+    choice_id = request.form["choice_id"]
+    polls.unvote(choice_id,users.user_id())    
 
     return redirect(f'/poll/{poll_id}')

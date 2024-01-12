@@ -6,7 +6,25 @@
 
 <hr>
 {% for choice in choices %}
-<p>{{ choice.name }}</p>
+<p>
+    {% if not choice[1] %}
+<form action="/upvote?poll_id={{ poll_id }}" method="POST">
+    {{ choice[0].name }}
+    <input type="submit" value="+">
+    {{choice[2]}}
+    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+    <input type="hidden" name="choice_id" value="{{ choice[0].id }}">
+</form>
+{% else %}
+<form action="/downvote?poll_id={{ poll_id }}" method="POST">
+    {{ choice[0].name }}
+    <input type="submit" value="-">
+    {{choice[2]}}
+    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+    <input type="hidden" name="choice_id" value="{{ choice[0].id }}">
+</form>
+{% endif %}
+</p>
 <hr>
 {% endfor %}
 <form action="/newchoice?poll_id={{ poll_id }}" method="POST">

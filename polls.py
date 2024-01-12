@@ -41,7 +41,9 @@ def poll_info(poll_id):
 
 def get_choices(poll_id):
     sql = text("SELECT * FROM polls_choices WHERE poll_id=:poll_id")
-    return db.session.execute(sql,{"poll_id":poll_id}).fetchall()
+    result = db.session.execute(sql,{"poll_id":poll_id}).fetchall()
+    print(result)
+    return result
 
 def add_choice(name, poll_id, added_by):
     sql = text("""
@@ -53,6 +55,7 @@ def add_choice(name, poll_id, added_by):
     return choice_id
 
 def vote(choice_id, user_id):
+    choice_id = int(choice_id)
     sql = text("""
         INSERT INTO polls_user_votes (choice_id, user_id)
         SELECT * FROM (SELECT :choice_id, :user_id) AS tmp
@@ -74,3 +77,7 @@ def has_voted(choice_id, user_id):
     if result != None:
         return True
     return False
+
+def get_choice_votes(choice_id):
+    sql = text("SELECT COUNT (user_id) FROM polls_user_votes WHERE choice_id=:choice_id")
+    return db.session.execute(sql, {"choice_id":choice_id}).fetchone()[0]
