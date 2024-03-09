@@ -1,17 +1,39 @@
-{% if session.user_id %}
-Logged in as <b>{{session.user_name}}</b> <a href="/logout">Log out</a>
-{% else %}
-<a href="/login">Log in</a>
-{% endif %}
+{% extends "layout.html" %}
+{% block title %} Group Polls {% endblock %}
 
-<h2>Group Polls</h2>
+{% block content %}
 
-<p>
+
 <h3>Groups</h3>
 
-<hr>
-{% for group in groups %}
-<a href="/group/{{ group.id }}">{{ group.name }}</a>
-<hr>
-{% endfor %}
-<a href="/newgroup"><b>New group</b></a></b>
+
+<div class="table-container">
+
+    <table class="table table-striped">
+        <tr>
+            <th>Group</th>
+            <th>Members</th>
+            <th>Joined</th>
+        </tr>
+        {% for group in group_info %}
+        <tr>
+            <td><a href="/group/{{ group.group_id }}">{{ group.name }}</a></td>
+            <td>{{ group.member_count }}</td>
+            <td>{{ group.user_joined_group }}</td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <td><a href="/newgroup"><b>+ New group</b></a></td>
+            <td></td>
+            <td></td>
+        </tr>
+
+    </table>
+</div>
+
+</body>
+
+</html>
+
+
+{% endblock %}

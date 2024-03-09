@@ -1,3 +1,16 @@
-Error: {{ message }}
+{% extends "layout.html" %}
+{% block title %} Error {% endblock %}
+
+{% block content %}
+
+<b>Error: {{ message }}</b>
+{% if link %}
+<p><a href="{{ link }}">{{link_text}}</a></p>
+{% else %}
+{% endif %}
 <p>
-<a href="/">Home</a>
+    <a href="/">Home</a>
+</p>
+
+
+{% endblock %}

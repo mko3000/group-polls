@@ -1,19 +1,30 @@
-<h2>New poll</h2>
+<!DOCTYPE html>
+<html>
 
-<form action="/newpoll" method="POST">
-    <p>Poll name: <br><input type="text" name="name" minlength="1" maxlength="20"></p>
-    <p>Description: <br>
-        <textarea name="description" rows="3" cols="40" maxlength="2000"></textarea>
-    </p>
+<head>
+    <link rel="stylesheet" type="text/css" href="/static/styles.css">
+    <title> Group polls - login </title>
+</head>
+
+<body>
+    <h2>New poll</h2>
+
+    <form action="/newpoll" method="POST">
+        <p>Poll name: <br><input type="text" name="name" minlength="1" maxlength="20"></p>
+        <p>Description: <br>
+            <textarea id="description" name="description" rows="3" cols="40" maxlength="2000"></textarea>
+        </p>
+        <p>
+            Poll ends:
+            <input type="datetime-local" name="poll_ends" value="{{ year }}-{{ month }}-{{ day }}T00:00">
+        </p>
+        <p>Add choices after creating the poll</p>
+
+        <input type="submit" class="button button-black" value="Create poll">
+        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+        <input type="hidden" name="group_id" value="{{ group_id }}">
+    </form>
     <p>
-        Poll ends:
-        <input type="datetime-local" name="poll_ends" value="{{ year }}-{{ month }}-{{ day }}T00:00">
-    </p>
-    <p>Add choices after creating the poll</p>
+        <a href="/group/{{ group_id }}">Back</a>
 
-    <input type="submit" value="Create poll">
-    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-    <input type="hidden" name="group_id" value="{{ group_id }}">
-</form>
-<p>
-    <a href="/group/{{ group_id }}">Back</a>
+</body>

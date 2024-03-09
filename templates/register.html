@@ -1,12 +1,23 @@
-<h2>New user</h2>
+<!DOCTYPE html>
+<html>
 
-<form action="/register" method="post">
-User name: <input type="text" name="username" minlength="1">
-Password: <input type="password" name="password">
-<p>
-<input type="submit" value="Register">
+<head>
+    <link rel="stylesheet" type="text/css" href="/static/styles.css">
+    <title> Group polls - register </title>
+</head>
 
-</form>
+<body>
+    <h2>New user</h2>
 
-<p>
-<a href="/login">Back</a>
+    <form action="/register" method="post">
+        User name: <input type="text" name="username" minlength="1">
+        Password: <input type="password" name="password">
+        <p>
+            <input type="submit" class="button button-black" value="Register">
+
+    </form>
+
+    <p>
+        <a href="/login">Back</a>
+
+</body>

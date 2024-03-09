@@ -1,25 +1,43 @@
-<h2>{{ name }}</h2>
-<p>members: {{ members }}</p>
+{% extends "layout.html" %}
+{% block title %} {{ name }} - polls{% endblock %}
+
+{% block content %}
+<p>Members in group: {{ members }}</p>
 
 {% if in_group %}
-You &#40;{{session.user_name}}&#41; have joined this group.
+You &#40;{{session.user_name}}&#41; have joined this group. <a href="/leave/{{ group_id }}">Leave group</a>
 <p>
 <h3>Polls</h3>
 
-<hr>
-{% for poll in polls %}
-<a href="/poll/{{ poll.id }}">{{ poll.name }}</a>
-<hr>
-{% endfor %}
-<p>
-    <a href="/newpoll"><b>New poll</b></a>
+<div class="table-container">
 
-<p>
-    <a href="/leave/{{ group_id }}">Leave group</a>
-    {% else %}
+    <table class="table table-striped">
+        
+        <tr>
+            <th>Poll</th>
+            <th>Closes at</th>
+        </tr>
+        {% for poll in polls %}
+        <tr>
+            <td><a href="/poll/{{ poll.id }}">{{ poll.name }}</a></td>
+            <td>{{ poll.closes_at }}</td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <td><a href="/newpoll"><b>+ New poll</b></a></td>
+            <td></td>
+        </tr>
+
+    </table>
+</div>
+
+
+{% else %}
 <form action="/group" method="post"></form>
 <a href="/join/{{ group_id }}">Join</a>
 {% endif %}
 
 <p>
     <a href="/">Back</a>
+
+    {% endblock %}

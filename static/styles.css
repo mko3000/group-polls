@@ -1,0 +1,78 @@
+body {
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.custom-form .container {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.custom-form .form-group {
+    margin-bottom: 20px;
+}
+
+.custom-form input[type="text"],
+.custom-form textarea {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.custom-form .button:hover {
+    background-color: orange;
+}
+
+form.inline-form {
+    display: inline-block;
+}
+
+.table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    border-color: #033524;
+    width: 100%;
+    display: table
+}
+
+.table-striped tbody tr:nth-child(even) {
+    background-color: #7db4a3
+}
+
+.table td,
+.table th {
+    padding: 8px 8px;
+    display: table-cell;
+    text-align: left;
+    vertical-align: top
+}
+
+.table th:first-child,
+.table td:first-child {
+    padding-left: 16px
+}
+
+.button:hover {
+    color: #033524 !important;
+    background-color: #ccc !important
+}
+
+.button-black,
+.button-hover-black:hover {
+    color: #fff !important;
+    background-color: #033524 !important
+}
+
+button {
+    font-weight: bold;
+    overflow: visible;
+    text-transform: none;
+}
+
+button,
+input,
+textarea {
+    font: inherit;
+    margin: 0
+}

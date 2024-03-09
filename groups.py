@@ -6,6 +6,23 @@ def get_all_groups():
     sql = text("SELECT id, name FROM polls_groups")
     return db.session.execute(sql).fetchall()
 
+def get_all_groups_with_info(user_id):
+    sql = text("""
+                SELECT 
+                    g.id AS group_id, 
+                    g.name, 
+                    g.creator, 
+                    COUNT(m.user_id) AS member_count, 
+                    BOOL_OR(m.user_id = :user_id) AS user_joined_group
+                FROM 
+                    polls_groups g
+                LEFT JOIN 
+                    polls_group_members m ON g.id = m.group_id
+                GROUP BY 
+                    g.id
+               """)
+    return db.session.execute(sql, {"user_id":user_id}).fetchall()
+
 def add_group(name, creator):
     if creator == 0:
         return False
@@ -28,7 +45,7 @@ def group_info(group_id):
     name = db.session.execute(sql, {"group_id":group_id}).fetchone()[0]
     sql = text("SELECT COUNT(user_id) FROM polls_group_members WHERE group_id=:group_id")
     member_count = db.session.execute(sql, {"group_id":group_id}).fetchone()[0]
-    return [name,member_count]
+    return (name,member_count)
 
 def join_group(user_id, group_id):
     print("JOINING USER ID:",user_id)

@@ -1,15 +1,20 @@
-{% if session.user_id %}
-Logged in as <b>{{session.user_name}}</b> <a href="/logout">Log out</a>
-{% else %}
-<a href="/login">Log in</a>
-{% endif %}
+<!DOCTYPE html>
+<html>
 
-<h2>New group</h2>
+<head>
+    <link rel="stylesheet" type="text/css" href="/static/styles.css">
+    <title> Group polls - login </title>
+</head>
 
-<form action="/newgroup" method="POST">
-Group name: <br><input type="text" name="name">
-<input type="submit" value="Submit">
-<input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-</form>
-<p>
-<a href="/">Back</a>
+<body>
+    <h2>New group</h2>
+
+    <form action="/newgroup" method="POST">
+        Group name: <br><input type="text" name="name">
+        <input type="submit" class="button button-black" value="Submit">
+        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+    </form>
+    <p>
+        <a href="/">Back</a>
+
+</body>

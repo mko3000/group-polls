@@ -1,45 +1,73 @@
-<h2>{{ group_name }}: {{ name }}</h2>
+{% extends "layout.html" %}
+{% block title %}{{ group_name }}: {{ name }}{% endblock %}
+
+{% block content %}
+
+<p>Description: {{ description }}</p>
 <p>Created by: {{ created_by }}</p>
+<p>Time left: <a id="counter">{{ time_left }}</a></p>
 
+<div class="table-container">
 
-<p>Time left: <a id="counter"></a></p>
+    <table class="table table-striped">
+        <tr>
+            <th>Choice</th>
+            <th>Votes</th>
+        </tr>
+        {% for choice in choices %}
+        <tr>
+            {% if not choice.has_voted %}
+            <form action="/upvote?poll_id={{ poll_id }}" method="POST">
+                <td>{{ choice.details.name }}</td>
+                <td>
+                    {% if not closed %}
+                    <input type="submit" class="button button-black" value="+">
+                    {% endif %}
+                    <b>{{choice.choice_votes}}</b>
+                </td>
+                <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+                <input type="hidden" name="choice_id" value="{{ choice.details.id }}">
+            </form>
+            {% else %}
+            <form action="/downvote?poll_id={{ poll_id }}" method="POST">
+                <td>{{ choice.details.name }}</td>
+                <td>
+                    {% if not closed %}
+                    <input type="submit" class="button button-black" value="-">
+                    {% endif %}
+                    <b>{{choice.choice_votes}}</b>
+                </td>
+                <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+                <input type="hidden" name="choice_id" value="{{ choice.details.id }}">
+            </form>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </table>
 
-<hr>
-{% for choice in choices %}
-<p>
-    {% if not choice[1] %}
-<form action="/upvote?poll_id={{ poll_id }}" method="POST">
-    {{ choice[0].name }}
-    <input type="submit" value="+">
-    {{choice[2]}}
-    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-    <input type="hidden" name="choice_id" value="{{ choice[0].id }}">
-</form>
-{% else %}
-<form action="/downvote?poll_id={{ poll_id }}" method="POST">
-    {{ choice[0].name }}
-    <input type="submit" value="-">
-    {{choice[2]}}
-    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-    <input type="hidden" name="choice_id" value="{{ choice[0].id }}">
-</form>
-{% endif %}
-</p>
-<hr>
-{% endfor %}
-<form action="/newchoice?poll_id={{ poll_id }}" method="POST">
+    {% if not closed %}
     <p>
-        <input type="text" name="new_choice" minlength="1" maxlength="50"><input type="submit" value="Add choice">
+    <form action="/newchoice?poll_id={{ poll_id }}" method="POST">
+
+        <input type="text" name="new_choice" minlength="1" maxlength="50"><input type="submit"
+            class="button button-black" value="Add choice">
         <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+
+    </form>
     </p>
-</form>
+    {% endif %}
+
+
+</div>
 
 <p>
     <a href="/group/{{ group_id }}">Back to group</a>
 </p>
 
+
+
 <script>
-    // Script copied from https://www.w3schools.com/howto/howto_js_countdown.asp
+    // Script for updating the countdown clock. Copied from https://www.w3schools.com/howto/howto_js_countdown.asp
     // Set the date we're counting down to
     var countDownDate = new Date("{{ closes_at }}").getTime();
 
@@ -62,10 +90,20 @@
         document.getElementById("counter").innerHTML = days + "d " + hours + "h "
             + minutes + "m " + seconds + "s ";
 
-        // If the count down is over, write some text 
+        // If the count down is over, print "expired" and refresh the page
         if (distance < 0) {
             clearInterval(x);
-            document.getElementById("demo").innerHTML = "EXPIRED";
+            document.getElementById("counter").innerHTML = "EXPIRED";
+
+            // If the poll hasn't been closed yet, refresh the page to hide the vote buttons 
+            // and the add choice form and refresh the vote counts the closed value to 1.
+            if ("{{ closed }}" == 0) {
+                location.reload()
+            }
         }
+
+
     }, 1000);
 </script>
+
+{% endblock %}

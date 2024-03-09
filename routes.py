@@ -1,6 +1,6 @@
 from app import app
 from flask import render_template, request, redirect
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 import users
 import groups
 import polls
@@ -9,7 +9,7 @@ import polls
 @app.route("/")
 def index():
     groups.end_group_session()
-    return render_template("index.html", groups=groups.get_all_groups())
+    return render_template("index.html", groups=groups.get_all_groups(), group_info=groups.get_all_groups_with_info(users.user_id()))
 
 @app.route("/login", methods=["get", "post"])
 def login():
@@ -21,7 +21,7 @@ def login():
         password = request.form["password"]
 
         if not users.login(username, password):
-            return render_template("error.html", message="Wrong user name or password")
+            return render_template("error.html", message="Wrong user name or password", link="/login", link_text="Try again")
         return redirect("/")
 
 @app.route("/logout")
@@ -37,25 +37,25 @@ def register():
     if request.method == "POST":
         username = request.form["username"]
         if len(username) < 1:
-            return render_template("error.html", message="Too short")
+            return render_template("error.html", message="Too short", link="/register", link_text="Try again")
 
         password1 = request.form["password"]
         #password2 = request.form["password2"]
         #TODO: password2 confirmation for regeister.html
         password2 = password1
         if password1 != password2:
-            return render_template("error.html", message="Passwords do not match")
+            return render_template("error.html", message="Passwords do not match",link="/register", link_text="Try again")
         if password1 == "":
-            return render_template("error.html", message="Empty password")
+            return render_template("error.html", message="Empty password",link="/register", link_text="Try again")
 
         if not users.register(username, password1):
-            return render_template("error.html", message="Registeration failed")
+            return render_template("error.html", message="Registeration failed",link="/register", link_text="Try again")
         return redirect("/")
 
 @app.route("/newgroup", methods=["get", "post"])
 def newgroup():
     if users.user_id() == 0:
-        return render_template("error.html", message="Not logged in")
+        return render_template("error.html", message="Not logged in", link="/login", link_text="Log in")
     
     if request.method == "GET":
         return render_template("newgroup.html")
@@ -66,14 +66,16 @@ def newgroup():
         name = request.form["name"]
         creator = users.user_id()
         group_id = groups.add_group(name, creator)
+        groups.join_group(users.user_id(),group_id)
 
     return redirect(f'/group/{group_id}')
 
 @app.route("/group/<int:group_id>")
 def group(group_id):
     groups.start_group_session(group_id)
-    name = groups.group_info(group_id)[0]
-    members = groups.group_info(group_id)[1]
+    group_info = groups.group_info(group_id)
+    name = group_info[0]
+    members = group_info[1]
     in_group = groups.in_group(users.user_id(), group_id)
     return render_template(
         "group.html", 
@@ -87,7 +89,7 @@ def group(group_id):
 @app.route("/join/<int:group_id>")
 def join(group_id):
     if users.user_id() == 0:
-        return render_template("error.html", message="Not logged in")
+        return render_template("error.html", message="Not logged in", link="/login", link_text="Log in")
     groups.join_group(users.user_id(),group_id)
     return redirect(f'/group/{group_id}')
 
@@ -104,7 +106,7 @@ def startnewpoll():
 @app.route("/newpoll", methods=["get", "post"])
 def newpoll():
     if users.user_id() == 0:
-        return render_template("error.html", message="Not logged in")
+        return render_template("error.html", message="Not logged in", link="/login", link_text="Log in")
     
     tomorrow = date.today() + timedelta(1)
     
@@ -121,7 +123,6 @@ def newpoll():
         name = request.form["name"]
         creator = users.user_id()
         closes_at = request.form["poll_ends"]
-        #closes_at = "2024-02-29 10:10:10"
         description = request.form["description"]
         group_id = groups.get_group_id()
         poll_id = polls.add_poll(name,group_id,creator,closes_at,description)
@@ -132,23 +133,28 @@ def newpoll():
 def poll(poll_id): 
     group_id = groups.get_group_id()
     group_name = groups.group_name(group_id)
-    info = polls.poll_info(poll_id)   
+    info = polls.poll_info(poll_id)  
     choices = polls.get_choices(poll_id)
     user_choices = []
+    time_left = info.closes_at - datetime.now()
+    time_left_str = f"{time_left.days}d {time_left.seconds // 3600}h {(time_left.seconds // 60) % 60}m {time_left.seconds % 60}s"
+
     for choice in choices:
-        user_choices.append((
-            choice, 
-            polls.has_voted(choice[0],users.user_id()),
-            polls.get_choice_votes(choice[0])
-        ))
+        user_choices.append({            
+            "details":choice, 
+            "has_voted":polls.has_voted(choice.id,users.user_id()),
+            "choice_votes":polls.get_choice_votes(choice.id)
+        })
 
     return render_template(
         "poll.html",
-        name = info[0],
-        created_by = users.get_user_name(info[1]),
-        created_at = info[2],
-        closes_at = info[3],
-        description = info[4],
+        name = info.name,
+        created_by = info.creator_name,
+        created_at = info.created_at,
+        closes_at = info.closes_at,
+        description = info.description,
+        time_left = time_left_str,
+        closed = int(datetime.now() > info.closes_at),
         group_id = group_id,
         group_name = group_name,
         choices = user_choices,
@@ -159,7 +165,7 @@ def poll(poll_id):
 def newchoice():
     users.check_csrf()
     if users.user_id() == 0:
-        return render_template("error.html", message="Not logged in")
+        return render_template("error.html", message="Not logged in", link="/login", link_text="Log in")
 
     poll_id = request.args.get("poll_id")
     choice_id = polls.add_choice(request.form["new_choice"], poll_id, users.user_id())
@@ -170,7 +176,7 @@ def newchoice():
 def upvote():
     users.check_csrf()
     if users.user_id() == 0:
-        return render_template("error.html", message="Not logged in")
+        return render_template("error.html", message="Not logged in", link="/login", link_text="Log in")
 
     poll_id = request.args.get("poll_id")
     choice_id = request.form["choice_id"]
@@ -182,7 +188,7 @@ def upvote():
 def downvote():
     users.check_csrf()
     if users.user_id() == 0:
-        return render_template("error.html", message="Not logged in")
+        return render_template("error.html", message="Not logged in", link="/login", link_text="Log in")
 
     poll_id = request.args.get("poll_id")
     choice_id = request.form["choice_id"]
