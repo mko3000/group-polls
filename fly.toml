@@ -1,0 +1,27 @@
+# fly.toml app configuration file generated for group-polls on 2024-03-13T10:25:25+02:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'group-polls'
+primary_region = 'arn'
+
+[http_service]
+  internal_port = 5000
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+
+[[vm]]
+  size = 'shared-cpu-1x'
+
+[env]
+  PORT = "5000"
+
+[[services]]
+  internal_port = 5000
+
+[processes]
+  web: gunicorn app:app
