@@ -31,10 +31,11 @@ CREATE TABLE polls_choices (
     poll_id INTEGER REFERENCES polls_polls,
     added_by INTEGER REFERENCES polls_users,
     added_at TIMESTAMP,
-    votes INTEGER --this isn't actually needed since we're using polls_user_votes
+    votes INTEGER
 );
 
 CREATE TABLE polls_user_votes (
     choice_id INTEGER REFERENCES polls_choices,
     user_id INTEGER REFERENCES polls_users
 );
+

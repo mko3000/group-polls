@@ -1,10 +1,16 @@
-# fly.toml app configuration file generated for group-polls on 2024-03-13T10:25:25+02:00
+# fly.toml app configuration file generated for group-polls-wild-waterfall-6809 on 2024-03-13T20:41:57+02:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
 app = 'group-polls'
-primary_region = 'arn'
+primary_region = 'ams'
+
+[build]
+  builder = 'paketobuildpacks/builder:base'
+
+[env]
+  PORT = '5000'
 
 [http_service]
   internal_port = 5000
@@ -16,12 +22,3 @@ primary_region = 'arn'
 
 [[vm]]
   size = 'shared-cpu-1x'
-
-[env]
-  PORT = "5000"
-
-[[services]]
-  internal_port = 5000
-
-[processes]
-  web: gunicorn app:app

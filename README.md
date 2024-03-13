@@ -46,6 +46,7 @@ git clone git@github.com:mko3000/group-polls.git
 ```
 2. Go to the root folder of the project and start the virtual environment with
 ```
+python3 -m venv venv
 source venv/bin/activate
 ```
 3. Install the dependencies with
@@ -60,6 +61,12 @@ psql < schema.sql
 ```
 psql < mockdata.sql
 ```
+The mock data includes some user profiles, for example "batman" and "ironman". All the mock profile passwords are "key123".
+
+6. Launch the app with
+```
+flask run
+```
 
 ## Notes about the implementation
-The methods ```polls.poll_stats``` and ```polls.poll_winner``` have been implemented with a complex sql query even though a python implementation would have been simpler. The motivation for this choice is to showcase my ability to formulate complez sql queries as this project is part of a course about databases and web programming.
+The methods ```polls.poll_stats``` and ```polls.poll_winner``` have been implemented with a complex sql query even though a python implementation would have been simpler. The motivation for this choice is to showcase my ability to formulate complex sql queries as this project is part of a course about databases and web programming.
