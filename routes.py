@@ -138,6 +138,16 @@ def poll(poll_id):
     user_choices = []
     time_left = info.closes_at - datetime.now()
     time_left_str = f"{time_left.days}d {time_left.seconds // 3600}h {(time_left.seconds // 60) % 60}m {time_left.seconds % 60}s"
+    poll_stats = polls.poll_stats(poll_id)
+    poll_winners = None  
+    results = polls.get_poll_results(poll_id) 
+    poll_results = []
+    for result in results: 
+        poll_results.append({"name":result.name, "votes":result.votes})
+    if time_left < timedelta(0):
+        time_left_str = "EXPIRED"
+        poll_winners = polls.poll_winner(poll_id)
+
 
     for choice in choices:
         user_choices.append({            
@@ -158,7 +168,10 @@ def poll(poll_id):
         group_id = group_id,
         group_name = group_name,
         choices = user_choices,
-        poll_id = poll_id
+        poll_id = poll_id,
+        poll_stats = poll_stats,
+        poll_winners = poll_winners,
+        poll_results = poll_results
     )
 
 @app.route("/newchoice", methods=["post"])
@@ -168,7 +181,11 @@ def newchoice():
         return render_template("error.html", message="Not logged in", link="/login", link_text="Log in")
 
     poll_id = request.args.get("poll_id")
-    choice_id = polls.add_choice(request.form["new_choice"], poll_id, users.user_id())
+    new_choice = request.form["new_choice"]
+    if len(new_choice) < 1:
+        return render_template("error.html", message="Too short", link=f"/poll/{poll_id}", link_text="Try again")
+    else:
+        choice_id = polls.add_choice(new_choice, poll_id, users.user_id())
 
     return redirect(f'/poll/{poll_id}')
 

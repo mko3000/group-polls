@@ -33,7 +33,6 @@
             align-items: center;
             flex: 1;
             min-width: 0;
-            /* Prevents flex items from overflowing */
         }
 
         .left-section {
@@ -72,6 +71,17 @@
 
         .logged-user {
             padding-right: 15px;
+        }
+
+        /* Use a media query to add a break point at 800px: */
+        @media screen and (max-width: 800px) {
+
+            .left-section,
+            .title,
+            .right-section {
+                width: 100%;
+                /* The width is 100%, when the viewport is 800px or smaller */
+            }
         }
     </style>
 

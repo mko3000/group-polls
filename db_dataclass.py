@@ -13,9 +13,18 @@ class Poll:
     description: str
 
 @dataclass
-class PollChoices:
+class PollChoice:
     id: int
     name: str
     poll_id: int
     added_by: int
+    added_at: datetime
     votes: int
+
+@dataclass
+class PollStats:
+    poll_id: int
+    total_votes: int
+    max_votes: int
+    avg_votes: float
+

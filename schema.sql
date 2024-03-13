@@ -30,7 +30,8 @@ CREATE TABLE polls_choices (
     name TEXT,
     poll_id INTEGER REFERENCES polls_polls,
     added_by INTEGER REFERENCES polls_users,
-    votes INTEGER --this may not be needed
+    added_at TIMESTAMP,
+    votes INTEGER --this isn't actually needed since we're using polls_user_votes
 );
 
 CREATE TABLE polls_user_votes (

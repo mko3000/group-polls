@@ -40,3 +40,5 @@ When creating a poll, the user can configure various properties for the poll.
 * Hide/show results if the user has not voted.
 * Lock the poll so that users can't add choices.
 * Poll creator can delete the poll.
+
+

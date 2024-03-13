@@ -1,6 +1,6 @@
 from db import db
 from sqlalchemy.sql import text
-from db_dataclass import Poll, PollChoices
+from db_dataclass import Poll, PollChoice, PollStats
 
 
 def get_group_polls(group_id):
@@ -14,7 +14,7 @@ def get_group_polls(group_id):
         list: A list of poll objects associated with the group.
     """
     sql = text("""
-        SELECT * FROM polls_polls WHERE group_id=:group_id
+        SELECT * FROM polls_polls WHERE group_id=:group_id ORDER BY closes_at
         """) 
     return db.session.execute(sql,{"group_id":group_id}).fetchall()
 
@@ -116,9 +116,9 @@ def get_choices(poll_id):
     Returns:
         list: A list of poll choice objects associated with the poll.
     """
-    sql = text("SELECT * FROM polls_choices WHERE poll_id=:poll_id")
+    sql = text("SELECT * FROM polls_choices WHERE poll_id=:poll_id ORDER BY added_at")
     out = db.session.execute(sql,{"poll_id":poll_id}).fetchall()
-    return [PollChoices(*x) for x in out]
+    return [PollChoice(*x) for x in out]
 
 
 def add_choice(name, poll_id, added_by):
@@ -135,8 +135,8 @@ def add_choice(name, poll_id, added_by):
     """
 
     sql = text("""
-        INSERT INTO polls_choices (name, poll_id, added_by, votes)
-        VALUES (:name, :poll_id, :added_by, 0) RETURNING id
+        INSERT INTO polls_choices (name, poll_id, added_by, added_at, votes)
+        VALUES (:name, :poll_id, :added_by, NOW(), 0) RETURNING id
     """)
     choice_id = db.session.execute(sql, {"name":name, "poll_id":poll_id, "added_by":added_by}).fetchone()[0]    
     db.session.commit()
@@ -144,7 +144,7 @@ def add_choice(name, poll_id, added_by):
 
 def vote(choice_id, user_id):
     """
-    Adds a vote to the database.
+    Adds a vote.
 
     Args:
         choice_id (int): The ID of the choice.
@@ -160,18 +160,25 @@ def vote(choice_id, user_id):
     """)
     db.session.execute(sql, {"choice_id":choice_id,"user_id":user_id})
     db.session.commit()
+    sql = text("UPDATE polls_choices SET votes = votes + 1 WHERE id = :choice_id")
+    db.session.execute(sql, {"choice_id":choice_id})
+    db.session.commit()
 
 def unvote(choice_id, user_id):
     """
-    Removes a vote from the database.
+    Removes a vote.
 
     Args:
         choice_id (int): The ID of the choice.
         user_id (int): The ID of the user who voted.
     """
-    sql = text("DELETE FROM polls_user_votes WHERE choice_id = :choice_id AND user_id = :user_id")
-    db.session.execute(sql, {"choice_id":choice_id,"user_id":user_id})
-    db.session.commit()
+    if get_choice_votes(choice_id) > 0:
+        sql = text("DELETE FROM polls_user_votes WHERE choice_id = :choice_id AND user_id = :user_id")
+        db.session.execute(sql, {"choice_id":choice_id,"user_id":user_id})
+        db.session.commit()
+        sql = text("UPDATE polls_choices SET votes = votes - 1 WHERE id = :choice_id")
+        db.session.execute(sql, {"choice_id":choice_id})
+        db.session.commit()
 
 def has_voted(choice_id, user_id):
     """
@@ -202,3 +209,130 @@ def get_choice_votes(choice_id):
     """
     sql = text("SELECT COUNT (user_id) FROM polls_user_votes WHERE choice_id=:choice_id")
     return db.session.execute(sql, {"choice_id":choice_id}).fetchone()[0]
+
+def poll_stats(poll_id):
+    """
+    Retrieve the statistics for a specific poll.
+
+    Args:
+        poll_id (int): The ID of the poll.
+
+    Returns:
+        PollStats: A poll stats object containing the statistics for the poll.
+    """
+    sql = text("""
+        WITH TotalVotes AS (
+            SELECT
+                poll_id,
+                COUNT(user_id) AS total_votes
+            FROM
+                polls_user_votes puv
+            JOIN
+                polls_choices pc ON puv.choice_id = pc.id
+            WHERE
+                pc.poll_id = :poll_id
+            GROUP BY
+                poll_id
+        ),
+        MaxVotes AS (
+            SELECT
+                poll_id,
+                MAX(vote_count) AS max_votes
+            FROM
+                (SELECT
+                    pc.poll_id,
+                    pc.id AS choice_id,
+                    COUNT(puv.user_id) AS vote_count
+                FROM
+                    polls_choices pc
+                LEFT JOIN
+                    polls_user_votes puv ON pc.id = puv.choice_id
+                WHERE
+                    pc.poll_id = :poll_id
+                GROUP BY
+                    pc.poll_id, pc.id) AS vote_counts
+            GROUP BY
+                poll_id
+        )
+        SELECT
+            tv.poll_id,
+            tv.total_votes,
+            mv.max_votes,
+            (tv.total_votes * 1.0 / (SELECT COUNT(*) FROM polls_choices WHERE poll_id = :poll_id)) AS average_votes_per_choice
+        FROM
+            TotalVotes tv
+        JOIN
+            MaxVotes mv ON tv.poll_id = mv.poll_id;
+    """)
+    out = db.session.execute(sql, {"poll_id":poll_id}).fetchall()[0]
+    return PollStats(*out[0:3],round(out[3],2))
+
+
+def poll_winner(poll_id):
+    """
+    Retrieve the winner of a specific poll.
+
+    Args:
+        poll_id (int): The ID of the poll.
+
+    Returns:
+        PollChoice: The choice that won the poll.
+    """
+    sql = text("""
+        WITH ChoiceVotes AS (
+            SELECT
+                pc.poll_id,
+                pc.id AS choice_id,
+                pc.name AS choice_name,
+                pc.added_by AS added_by,
+                pc.added_at AS added_at,
+                pc.votes AS votes,
+                COUNT(puv.user_id) AS vote_count
+            FROM
+                polls_choices pc
+            LEFT JOIN
+                polls_user_votes puv ON pc.id = puv.choice_id
+            WHERE
+                pc.poll_id = :poll_id
+            GROUP BY
+                pc.poll_id, pc.id, pc.name
+        ),
+        MaxVotes AS (
+            SELECT
+                poll_id,
+                MAX(vote_count) AS max_votes
+            FROM
+                ChoiceVotes
+            GROUP BY
+                poll_id
+        )
+        SELECT
+            cv.choice_id,
+            cv.choice_name,
+            cv.added_by,
+            cv.added_at,
+            cv.votes
+        FROM
+            ChoiceVotes cv
+        JOIN
+            MaxVotes mv ON cv.poll_id = mv.poll_id AND cv.vote_count = mv.max_votes
+        WHERE
+            cv.poll_id = :poll_id
+    """)
+    out = db.session.execute(sql, {"poll_id":poll_id}).fetchall()
+    return [PollChoice(*row[0:2],poll_id,*row[2:]) for row in out]
+
+def get_poll_results(poll_id):
+    """
+    Retrieve the results of a specific poll.
+
+    Args:
+        poll_id (int): The ID of the poll.
+
+    Returns:
+        list: A list of poll choice objects containing the results of the poll.
+    """
+    choices = get_choices(poll_id)
+    choices = sorted(choices, key=lambda x: x.votes, reverse=True)
+
+    return choices
