@@ -77,13 +77,18 @@ def group(group_id):
     name = group_info[0]
     members = group_info[1]
     in_group = groups.in_group(users.user_id(), group_id)
+    poll_list = polls.get_group_polls(group_id)
+    for poll in poll_list:
+        if poll.closes_at < datetime.now():
+            print("expired poll")
     return render_template(
         "group.html", 
         group_id=group_id, 
         name=name, 
         members=members, 
         in_group=in_group, 
-        polls=polls.get_group_polls(group_id)
+        polls=poll_list,
+        current_time = datetime.now()
     )
 
 @app.route("/join/<int:group_id>")

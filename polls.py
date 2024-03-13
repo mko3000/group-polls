@@ -264,7 +264,10 @@ def poll_stats(poll_id):
         JOIN
             MaxVotes mv ON tv.poll_id = mv.poll_id;
     """)
-    out = db.session.execute(sql, {"poll_id":poll_id}).fetchall()[0]
+    out = db.session.execute(sql, {"poll_id":poll_id}).fetchall()
+    if not out:
+        return
+    out = out[0]
     return PollStats(*out[0:3],round(out[3],2))
 
 

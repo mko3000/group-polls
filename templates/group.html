@@ -12,7 +12,7 @@ You &#40;{{session.user_name}}&#41; have joined this group. <a href="/leave/{{ g
 <div class="table-container">
 
     <table class="table table-striped">
-        
+
         <tr>
             <th>Poll</th>
             <th>Closes at</th>
@@ -20,7 +20,11 @@ You &#40;{{session.user_name}}&#41; have joined this group. <a href="/leave/{{ g
         {% for poll in polls %}
         <tr>
             <td><a href="/poll/{{ poll.id }}">{{ poll.name }}</a></td>
-            <td>{{ poll.closes_at }}</td>
+            {% if poll.closes_at < current_time %} 
+                <td>Expired</td>
+            {% else %}
+                <td>{{ poll.closes_at }}</td>
+            {% endif %}
         </tr>
         {% endfor %}
         <tr>
